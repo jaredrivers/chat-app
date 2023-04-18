@@ -17,9 +17,9 @@ export default function Home() {
 
 	return (
 		<View>
-			<SafeAreaView style={styles.background}>
-				<View style={styles.chatArea}>
-					<Text>Message Area</Text>
+			<SafeAreaView className='flex flex-col w-full h-full bg-[#f6fff8]'>
+				<View className='grow'>
+					<Text className='text-2xl '>Message Area</Text>
 				</View>
 				<TextArea
 					message={message}
@@ -30,17 +30,3 @@ export default function Home() {
 		</View>
 	);
 }
-
-const styles = StyleSheet.create({
-	background: {
-		display: "flex",
-		width: "100%",
-		height: "100%",
-		flexDirection: "column",
-		backgroundColor: "#f6fff8",
-	},
-	chatArea: {
-		flexGrow: 1,
-		backgroundColor: "red",
-	},
-});
