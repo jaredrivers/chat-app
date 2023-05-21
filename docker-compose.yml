@@ -1,0 +1,28 @@
+version: "3.8"
+services:
+  db:
+    image: postgres:15.2-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: chat-db
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    restart: always
+    ports:
+      - "5433:5432"
+  # prisma:
+  #   image: prismagraphql/prisma:__LATEST_PRISMA_VERSION__
+  #   restart: always
+  #   ports:
+  #     - "5555:5555"
+  #   environment:
+  #     PRISMA_CONFIG:
+  #       port: 5555
+  #       databases:
+  #         default:
+  #           connector: psql
+  #           host: psql
+  #           port: 5432
+  #           user: postgres
+  #           password: postgres
