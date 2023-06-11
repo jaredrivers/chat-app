@@ -11,31 +11,30 @@ datasource db {
 }
 
 model User {
-  id        String @id @default(uuid())
-  email     String @unique
+  id        String    @id @default(uuid()) @db.Uuid
+  email     String    @unique
   firstName String
   lastName  String
+  role      Role      @default(USER)
   chats     Chat[]
-  role      Role   @default(USER)
-}
-
-model Message {
-  id         String   @id @default(uuid()) @db.Uuid
-  sentBy     String
-  sentAt     DateTime
-  receivedAt DateTime @default(now())
-  content    String
-  userId     String
-  chat       Chat?    @relation(fields: [chatId], references: [id])
-  chatId     String?
+  Message   Message[]
 }
 
 model Chat {
-  id           String    @id
-  name         String
+  id           String    @id @default(uuid()) @db.Uuid
   messages     Message[]
   participants User[]
-  messageId    String
+}
+
+model Message {
+  id         String    @id
+  sentBy     User      @relation(fields: [userId], references: [id])
+  userId     String    @db.Uuid
+  sentAt     DateTime
+  receivedAt DateTime?
+  content    String
+  chat       Chat      @relation(fields: [chatId], references: [id])
+  chatId     String    @db.Uuid
 }
 
 enum Role {
