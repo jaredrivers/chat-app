@@ -17,8 +17,15 @@ model User {
   lastName  String
   role      Role      @default(USER)
   chats     Chat[]
-  Message   Message[]
+  Messages  Message[]
+  // Contacts  Contact[]
 }
+
+// model Contact {
+//   id     Int    @id @default(autoincrement())
+//   for    User   @relation(fields: [userId], references: [id])
+//   userId String @db.Uuid
+// }
 
 model Chat {
   id           String    @id @default(uuid()) @db.Uuid

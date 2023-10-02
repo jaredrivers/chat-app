@@ -9,7 +9,6 @@ import { PrismaClient } from "@prisma/client";
 
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 4000;
 
 export const prisma = new PrismaClient({
 	log: [{ level: "query", emit: "event" }],
@@ -26,6 +25,7 @@ const bootstrapServer = async () => {
 	});
 
 	await server.start();
+	const PORT = process.env.PORT || 4000;
 
 	app.use(cors());
 	app.use(express.json());

@@ -14,11 +14,11 @@ type Chat {
     name: String
     messages: [Message]
     participants: [User]
-    }
+}
 
 type Message {
     id: ID
-    sentBy: String
+    sentBy: ID
     sentAt: Date
     receivedAt: Date
     content: String
@@ -27,11 +27,14 @@ type Message {
 }
 type Query {
     users: [User]
+    chats: [Chat]
+    messages(chatID: ID): [Message]
 }
 
 type Mutation {
     createUser(email: String, firstName: String, lastName: String): User
     createChat(senderID: ID, receiverID: ID): Chat
+    sendMessage(receiverID: ID, content: String): Message
     msgReceived: Boolean
 }
 
