@@ -10,6 +10,7 @@ export const resolvers = {
 		},
 	},
 	Mutation: {
+		//find user, create chat room, backup chat to db on chat close or after every message
 		createChat: async (
 			_: any,
 			args: { senderID: string; receiverID: string }
@@ -57,38 +58,54 @@ export const resolvers = {
 				console.log(err);
 			}
 		},
+		// send msg to open chatroom, send to local storage, send to DB, check if received then mark accordingly
+		//if not received figure out how to add to queue
 		sendMessage: async (
 			_: any,
 			args: { receiverID: string; content: string }
 		) => {
 			const { receiverID, content } = args;
+			console.log(args);
 
-			// check if user is contact
-			// check if chat between users exsists, if yes then send
+			let senderID = "700a9675-eb85-4f6c-bd27-6425d9805925";
+
+			// check if chat between users exsists
 			try {
-				prisma.chat.findFirst({
+				let chat = await prisma.chat.findFirst({
 					where: {
+						participants: {
+							every: {
+								id: {
+									in: [senderID],
+								},
+							},
+						},
+					},
+					include: {
 						participants: {},
 					},
 				});
-				console.log(receiverID, content);
+
+				console.log("CHAT: ", chat);
+				// if no chat then create chat and send
+				if (!chat) {
+					// try {
+					// 	let user = await prisma.user.create({
+					// 		data: {
+					// 			email,
+					// 			firstName,
+					// 			lastName,
+					// 		},
+					// 	});
+					// 	return user;
+					// } catch (err) {
+					// 	console.log(err);
+					// }
+					console.log("NO CHAT");
+				}
 			} catch (err) {
 				console.log(err);
 			}
-			// if no chat then create chat and send
-
-			// try {
-			// 	let user = await prisma.user.create({
-			// 		data: {
-			// 			email,
-			// 			firstName,
-			// 			lastName,
-			// 		},
-			// 	});
-			// 	return user;
-			// } catch (err) {
-			// 	console.log(err);
-			// }
 		},
 		msgReceived: (msgID: string) => {
 			let now = Date.now();
