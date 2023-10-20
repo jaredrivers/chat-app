@@ -30,7 +30,15 @@ const bootstrapServer = async () => {
 	app.use(cors());
 	app.use(express.json());
 	app.use(express.urlencoded({ extended: true }));
-	app.use("/graphql", expressMiddleware(server));
+	app.use(
+		"/graphql",
+		expressMiddleware(server, {
+			context: async ({ req, res }) => ({
+				req,
+				res,
+			}),
+		})
+	);
 
 	app.listen(PORT, () => {
 		process.env.NODE_ENV === "development" &&

@@ -3,7 +3,8 @@ export const resolvers = {
 	Query: {
 		users: (_: any, __: any, contextValue: any) => {
 			console.log("cv: ", contextValue);
-			return prisma.user.findMany();
+			let userList = prisma.user.findMany();
+			return userList;
 		},
 		chats: () => {
 			return prisma.chat.findMany();
@@ -101,7 +102,6 @@ export const resolvers = {
 					// } catch (err) {
 					// 	console.log(err);
 					// }
-					console.log("NO CHAT");
 				}
 			} catch (err) {
 				console.log(err);

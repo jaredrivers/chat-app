@@ -33,8 +33,9 @@ type Query {
 
 type Mutation {
     createUser(email: String, firstName: String, lastName: String): User
+    # login(email: string, password: string)
     createChat(senderID: ID, receiverID: ID): Chat
-    sendMessage(receiverID: ID, content: String): Message
+    sendMessage(receiverID: ID,  content: String): Message
     msgReceived: Boolean
 }
 
