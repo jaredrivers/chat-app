@@ -15,13 +15,14 @@ export const prisma = new PrismaClient({
 });
 
 prisma.$on("query", (e) => {
-	console.log(e);
+	// console.log(e);
 });
 
 const bootstrapServer = async () => {
 	const server = new ApolloServer({
 		typeDefs,
 		resolvers,
+		introspection: process.env.NODE_ENV !== "production",
 	});
 
 	await server.start();
@@ -33,10 +34,18 @@ const bootstrapServer = async () => {
 	app.use(
 		"/graphql",
 		expressMiddleware(server, {
-			context: async ({ req, res }) => ({
-				req,
-				res,
-			}),
+			context: async ({ req }) => {
+				let headers = req.headers;
+
+				let userObject = {
+					firstName: "Jared",
+					lastName: "Fischer",
+					email: "jared.river@gmail.com",
+					id: "700a9675-eb85-4f6c-bd27-6425d9805925",
+				};
+
+				return { userObject, headers };
+			},
 		})
 	);
 

@@ -1,48 +1,21 @@
-export const typeDefs = `#graphql
+import { Message } from "./Message/MessageTypeDefs";
+import { Chat } from "./Chat/ChatTypeDefs";
+import { User } from "./User/UserTypeDefs";
+import { Auth } from "./Auth/AuthTypeDefs";
 
-type User {
-    id: ID
-    email: String
-    firstName: String
-    lastName: String
-    chats: [Chat]
-    role: Role
-}
+const globalTypes = `#graphql
+    type Query {
+        root: String
+    }
+    type Mutation {
+        root: String
+    }
+    scalar Date
 
-type Chat {
-    id: ID
-    name: String
-    messages: [Message]
-    participants: [User]
-}
-
-type Message {
-    id: ID
-    sentBy: ID
-    sentAt: Date
-    receivedAt: Date
-    content: String
-    userId: String
-    chat: Chat
-}
-type Query {
-    users: [User]
-    chats: [Chat]
-    messages(chatID: ID): [Message]
-}
-
-type Mutation {
-    createUser(email: String, firstName: String, lastName: String): User
-    # login(email: string, password: string)
-    createChat(senderID: ID, receiverID: ID): Chat
-    sendMessage(receiverID: ID,  content: String): Message
-    msgReceived: Boolean
-}
-
-scalar Date
-
-enum Role {
-    USER
-    ADMIN
-}
+    enum Role {
+        ADMIN
+        USER
+    }
 `;
+
+export const typeDefs = [globalTypes, Message, Chat, User, Auth];
