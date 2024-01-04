@@ -10,11 +10,11 @@ export const User = `#graphql
     role: Role
     }
 
-    extend type Query {
-    users: [User]
+extend type Query {
+    users: [User]  @auth(requires: ADMIN)
     }
 
-    extend type Mutation {
+extend type Mutation {
     createUser(email: String, firstName: String, lastName: String): User
     }
 `;

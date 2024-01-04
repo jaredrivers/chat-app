@@ -16,7 +16,7 @@ model User {
   firstName   String
   lastName    String
   password    String
-  phoneNumber String
+  phoneNumber String?
   role        Role      @default(USER)
   chats       Chat[]
   Messages    Message[]

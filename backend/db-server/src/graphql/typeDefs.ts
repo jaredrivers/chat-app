@@ -4,6 +4,8 @@ import { User } from "./User/UserTypeDefs";
 import { Auth } from "./Auth/AuthTypeDefs";
 
 const globalTypes = `#graphql
+      directive @auth(requires: Role = ADMIN) on OBJECT | FIELD_DEFINITION
+
     type Query {
         root: String
     }

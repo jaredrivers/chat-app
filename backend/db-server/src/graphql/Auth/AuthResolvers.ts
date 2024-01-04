@@ -1,23 +1,21 @@
 import { prisma } from "../..";
-import { userExists } from "./Functions";
+import { issueToken, userExists } from "./AuthFunctions";
 import bcrypt from "bcrypt";
 
 const resolvers = {
 	Query: {},
 	Mutation: {
-		signUp: async (_: any, args: any) => {
-			const { formData } = args;
-			const { email, firstName, lastName, password, phoneNumber } = formData;
+		signUp: async (_: any, { args }: any) => {
+			const { email, firstName, lastName, password, phoneNumber } = args;
 
 			//check if user then create
-			const user = await userExists(formData.email);
+			const user = await userExists(email);
 
 			if (user) {
 				return {
 					code: 404,
 					message: "User exists with that email.",
 					success: false,
-					user: null,
 				};
 			}
 
@@ -47,8 +45,40 @@ const resolvers = {
 					code: 500,
 					message: "Account creation failed.\n" + error,
 					success: true,
-					user: null,
 				};
+			}
+		},
+
+		login: async (_: any, { args }: any) => {
+			const { email, password } = args;
+
+			const user = await prisma.user.findUnique({
+				where: {
+					email,
+				},
+			});
+			if (!user) {
+				return {
+					code: 400,
+					message: "User does not exist with that email.",
+					success: false,
+				};
+			} else {
+				if (bcrypt.compareSync(password, user.password)) {
+					const token = issueToken(user.id, email);
+					return {
+						code: 200,
+						message: "User has logged in successfully.",
+						success: true,
+						token,
+					};
+				} else {
+					return {
+						code: 400,
+						message: "Password is incorrect.\n",
+						success: false,
+					};
+				}
 			}
 		},
 	},

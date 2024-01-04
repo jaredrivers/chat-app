@@ -1,5 +1,4 @@
 export const Auth = `#graphql
-
     interface AuthResponse {
         code: String!
         message: String!
@@ -28,9 +27,13 @@ export const Auth = `#graphql
         phoneNumber: String!
         password: String!
     }
+    input LoginInput {
+        email: String!
+        password: String!
+    }
 
 	extend type Mutation {
-    	signUp(formData: SignUpInput!): SignUpResponse
-        login: LoginResponse
+    	signUp(args: SignUpInput!): SignUpResponse
+        login(args: LoginInput!): LoginResponse
 }
 `;

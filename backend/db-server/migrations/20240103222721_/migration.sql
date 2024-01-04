@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "User" ALTER COLUMN "password" DROP DEFAULT,
+ALTER COLUMN "phoneNumber" DROP NOT NULL,
+ALTER COLUMN "phoneNumber" DROP DEFAULT;

@@ -6,6 +6,9 @@ import { expressMiddleware } from "@apollo/server/express4";
 import { typeDefs } from "./graphql/typeDefs";
 import { resolvers } from "./graphql/resolvers";
 import { PrismaClient } from "@prisma/client";
+import { getToken } from "./graphql/Auth/AuthFunctions";
+import { makeExecutableSchema } from "@graphql-tools/schema";
+import { authDirectiveTransformer } from "./graphql/Directives/AuthDirective";
 
 dotenv.config();
 const app = express();
@@ -17,11 +20,15 @@ export const prisma = new PrismaClient({
 prisma.$on("query", (e) => {
 	// console.log(e);
 });
+let schema = makeExecutableSchema({
+	typeDefs,
+	resolvers,
+});
+schema = authDirectiveTransformer(schema, "auth");
 
 const bootstrapServer = async () => {
 	const server = new ApolloServer({
-		typeDefs,
-		resolvers,
+		schema,
 		introspection: process.env.NODE_ENV !== "production",
 	});
 
@@ -35,16 +42,9 @@ const bootstrapServer = async () => {
 		"/graphql",
 		expressMiddleware(server, {
 			context: async ({ req }) => {
-				let headers = req.headers;
-
-				let userObject = {
-					firstName: "Jared",
-					lastName: "Fischer",
-					email: "jared.river@gmail.com",
-					id: "700a9675-eb85-4f6c-bd27-6425d9805925",
-				};
-
-				return { userObject, headers };
+				const { headers } = req;
+				let currentUser = getToken(headers);
+				return { currentUser, headers };
 			},
 		})
 	);
