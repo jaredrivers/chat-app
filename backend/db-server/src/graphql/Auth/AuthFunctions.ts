@@ -1,20 +1,33 @@
 import { sign, verify } from "jsonwebtoken";
 import { prisma } from "../..";
+import { IAuthUser } from "./AuthTypes";
+import { ApolloServerErrorCode } from "@apollo/server/errors";
+import { GraphQLError } from "graphql";
+import { User } from "@prisma/client";
+import jwt from "jsonwebtoken";
 
 const jwtSecret = "this is my secret";
 
-export const getToken = (headers: any) => {
-	if (headers.authorization && headers.authorization !== "") {
-		const token = headers.authorization.split(" ")[1];
-		try {
-			const data = verify(token, jwtSecret);
-			return data;
-		} catch (error) {
-			return null;
+export const verifyToken = (token: string): IAuthUser | Error => {
+	try {
+		const data = verify(token, jwtSecret) as any;
+
+		let verified = {
+			id: data.id,
+			email: data.email,
+			auth: true,
+			permissions: data.permissions,
+			token,
+		} as IAuthUser;
+
+		return verified;
+	} catch (error: any) {
+		if (error instanceof jwt.JsonWebTokenError) {
+			if (error.name == jwt.TokenExpiredError.name) {
+				//issue refresh token
+			}
 		}
-		// return data;
-	} else {
-		return null;
+		return new GraphQLError(error.message);
 	}
 };
 
@@ -31,11 +44,13 @@ export const userExists = async (email: string) => {
 	}
 };
 
-export const issueToken = (userId: any, email: any) => {
+export const issueToken = async (user: User) => {
 	const token = sign(
 		{
-			userId,
-			email,
+			id: user.id,
+			email: user.email,
+			auth: true,
+			permissions: user.permissions,
 		},
 		jwtSecret,
 		{

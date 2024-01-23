@@ -1,11 +1,14 @@
-import { defaultFieldResolver, GraphQLSchema } from "graphql";
+import {
+	defaultFieldResolver,
+	defaultTypeResolver,
+	GraphQLSchema,
+} from "graphql";
 import { getDirective, MapperKind, mapSchema } from "@graphql-tools/utils";
 
 export function authDirectiveTransformer(
 	schema: GraphQLSchema,
 	directiveName: string
 ) {
-	console.log("8: directiveName: ", directiveName);
 	return mapSchema(schema, {
 		[MapperKind.OBJECT_FIELD]: (fieldConfig) => {
 			const authDirective = getDirective(
@@ -13,23 +16,42 @@ export function authDirectiveTransformer(
 				fieldConfig,
 				directiveName
 			)?.[0];
+
 			const { resolve = defaultFieldResolver } = fieldConfig;
 
 			if (authDirective) {
+				const requirement = authDirective.requires;
 				return {
 					...fieldConfig,
 					resolve: async function (source, args, context, info) {
-						console.log("source: ", source);
-						console.log("args: ", args);
-						console.log("context: ", context);
-						console.log("info: ", info);
-						const result = await resolve(source, args, context, info);
-
-						console.log("25: ", result);
+						const { currentUser } = context;
+						if (
+							currentUser.auth &&
+							currentUser.permissions.includes(requirement)
+						) {
+							const result = await resolve(source, args, context, info);
+							return result;
+						} else {
+							return Error("User is not authorized.");
+						}
 					},
 				};
 			}
 			return fieldConfig;
 		},
+		// [MapperKind.OBJECT_TYPE]: (objectType) => {
+		// 	const authDirective = getDirective(
+		// 		schema,
+		// 		objectType,
+		// 		directiveName
+		// 	)?.[0];
+
+		// 	if (authDirective) {
+		// 		const requirement = authDirective.requires;
+		// 		return {
+		// 			...objectType,
+		// 		};
+		// 	}
+		// },
 	});
 }

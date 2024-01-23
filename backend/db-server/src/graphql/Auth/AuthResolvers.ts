@@ -22,8 +22,6 @@ const resolvers = {
 			const salt = bcrypt.genSaltSync(10);
 			const hashedPassword = bcrypt.hashSync(password, salt);
 
-			console.log(password, hashedPassword);
-
 			try {
 				const newUser = await prisma.user.create({
 					data: {
@@ -44,7 +42,7 @@ const resolvers = {
 				return {
 					code: 500,
 					message: "Account creation failed.\n" + error,
-					success: true,
+					success: false,
 				};
 			}
 		},
@@ -65,7 +63,7 @@ const resolvers = {
 				};
 			} else {
 				if (bcrypt.compareSync(password, user.password)) {
-					const token = issueToken(user.id, email);
+					const token = issueToken(user);
 					return {
 						code: 200,
 						message: "User has logged in successfully.",

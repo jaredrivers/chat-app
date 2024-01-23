@@ -1,13 +1,11 @@
-import { prisma } from "../../index";
-
 export const User = `#graphql
-    type User {
+    type User @auth(requires: USER) {
     id: ID
     email: String
     firstName: String
     lastName: String
     chats: [Chat]
-    role: Role
+    permissions: [Permissions]
     }
 
 extend type Query {
@@ -15,6 +13,6 @@ extend type Query {
     }
 
 extend type Mutation {
-    createUser(email: String, firstName: String, lastName: String): User
+    createUser(email: String, firstName: String, lastName: String): User @auth(requires: ADMIN)
     }
 `;
