@@ -6,13 +6,13 @@ import { expressMiddleware } from "@apollo/server/express4";
 import { typeDefs } from "./graphql/typeDefs";
 import { resolvers } from "./graphql/resolvers";
 import { PrismaClient } from "@prisma/client";
-import { verifyToken } from "./graphql/Auth/AuthFunctions";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { authDirectiveTransformer } from "./graphql/Directives/AuthDirective";
 import { IAuthUser, INonAuthUser } from "./graphql/Auth/AuthTypes";
 import session from "express-session";
-import redis from "redis";
+import { createClient } from "redis";
 import RedisStore from "connect-redis";
+import { verifySession } from "./graphql/Auth/AuthFunctions";
 
 dotenv.config();
 const app = express();
@@ -31,10 +31,10 @@ let schema = makeExecutableSchema({
 
 schema = authDirectiveTransformer(schema, "auth");
 
-let redisClient = redis.createClient();
-redisClient.connect().catch(console.error);
-
 const bootstrapServer = async () => {
+	let redisClient = createClient();
+	redisClient.connect().catch(console.error);
+
 	const server = new ApolloServer({
 		schema,
 		introspection: process.env.NODE_ENV !== "production",
@@ -65,18 +65,12 @@ const bootstrapServer = async () => {
 		"/graphql",
 		expressMiddleware(server, {
 			context: async ({ req }) => {
-				const { headers } = req;
+				const { headers, session } = req as any;
 				let currentUser: IAuthUser | INonAuthUser = { auth: false };
+				currentUser = verifySession(session);
+				console.log(currentUser);
 
-				if (headers.authorization && headers.authorization !== "") {
-					const token = headers.authorization.split(" ")[1];
-					let res = verifyToken(token);
-					if (res instanceof Error === false) {
-						currentUser = res;
-					}
-				}
-
-				return { currentUser, headers };
+				return { currentUser, headers, session };
 			},
 		})
 	);

@@ -1,5 +1,5 @@
 import { prisma } from "../..";
-import { issueToken, userExists } from "./AuthFunctions";
+import { userExists } from "./AuthFunctions";
 import bcrypt from "bcrypt";
 
 const resolvers = {
@@ -47,7 +47,7 @@ const resolvers = {
 			}
 		},
 
-		login: async (_: any, { args }: any) => {
+		login: async (_: any, { args }: any, { session }: any) => {
 			const { email, password } = args;
 
 			const user = await prisma.user.findUnique({
@@ -63,12 +63,14 @@ const resolvers = {
 				};
 			} else {
 				if (bcrypt.compareSync(password, user.password)) {
-					const token = issueToken(user);
+					session.userId = user.id;
+					session.permissions = user.permissions;
+					session.email = user.email;
+
 					return {
 						code: 200,
 						message: "User has logged in successfully.",
 						success: true,
-						token,
 					};
 				} else {
 					return {
