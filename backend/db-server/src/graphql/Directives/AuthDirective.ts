@@ -1,6 +1,7 @@
 import {
 	defaultFieldResolver,
 	defaultTypeResolver,
+	GraphQLError,
 	GraphQLSchema,
 } from "graphql";
 import { getDirective, MapperKind, mapSchema } from "@graphql-tools/utils";
@@ -24,15 +25,32 @@ export function authDirectiveTransformer(
 				return {
 					...fieldConfig,
 					resolve: async function (source, args, context, info) {
-						const { currentUser } = context;
-						if (
+						const { currentUser, session } = context;
+						console.log(session);
+						if (!session || !session.userId) {
+							return new GraphQLError("UNAUTHORIZED", {
+								extensions: {
+									code: "You need to be logged in to access this resource.",
+									http: {
+										status: 401,
+									},
+								},
+							});
+						} else if (
 							currentUser.auth &&
 							currentUser.permissions.includes(requirement)
 						) {
 							const result = await resolve(source, args, context, info);
 							return result;
 						} else {
-							return Error("User is not authorized.");
+							return new GraphQLError("UNAUTHORIZED", {
+								extensions: {
+									code: "You do not have persmission to access this resource.",
+									http: {
+										status: 401,
+									},
+								},
+							});
 						}
 					},
 				};

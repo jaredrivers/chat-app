@@ -65,10 +65,9 @@ const bootstrapServer = async () => {
 		"/graphql",
 		expressMiddleware(server, {
 			context: async ({ req }) => {
-				const { headers, session } = req as any;
+				const { headers, session } = req;
 				let currentUser: IAuthUser | INonAuthUser = { auth: false };
 				currentUser = verifySession(session);
-				console.log(currentUser);
 
 				return { currentUser, headers, session };
 			},
